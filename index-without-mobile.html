@@ -1,0 +1,275 @@
+<script src="https://cdn.tailwindcss.com"></script>
+
+<html class="bg-neutral-900 text-white" x-data="peruzi">
+    <nav class="h-16 backdrop-blur-sm sticky -top-px z-50 transition-colors duration-200"
+        :class="{'backdrop-blur-sm': !scrolled, 'bg-neutral-900': scrolled}"
+    >
+        <div class="h-full mx-auto max-w-7xl flex items-center justify-between">
+            <div class="flex items-center">
+                <img class="h-6 mr-3" src="favicon.png" alt="" />
+                <span class="text-lg font-medium">Peruzi Movies</span>
+            </div>
+    
+            <div class="flex items-center gap-4 text-neutral-300">
+                <div class="relative">
+                    <div class="absolute left-0 inset-y-0 pl-3 pointer-events-none flex items-center">
+                        <svg class="w-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+
+                    <input id="searchInput" required="" name="q" type="search" style="width: 250px" class="bg-transparent rounded-full border border-current focus:outline-none pt-1.5 pb-2 pl-9 text-base leading-none placeholder:text-neutral-400/75" placeholder="Type to search..." />
+                </div>
+
+                <div class="flex items-center">
+                    <span class="mr-1">
+                        Sort by:
+                    </span>
+
+                    <div class="relative border border-current rounded">
+                        <select id="sortBy" class="appearance-none bg-transparent text-sm leading-none py-2 pl-2 pr-7 focus:outline-none">
+                            <option value="year">Release Year</option>
+                            <option value="date">Upload date</option>
+                        </select>
+
+                        <svg class="w-5 h-5 z-10 absolute inset-y-0 my-auto right-1" fill="currentColor" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="-mt-16 mb-5 relative">
+        <div class="relative h-[600px]">
+            <template x-for="(movie, index) in featuredMovies">
+                <img class="absolute inset-0 h-full w-full object-cover object-top transition-all duration-1000"
+                    :class="{'opacity-0 scale-95 -translate-y-10': index !== featuredMoviesScrollStep}"
+                    :src="movie.cover" alt="" 
+                />
+            </template>
+        </div>
+
+        <div class="absolute inset-0 pt-36 pb-20 bg-gradient-to-b from-transparent via-neutral-900/50 to-neutral-900">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <button class="-ml-3 flex-shrink-0 rounded-full text-white/40 hover:text-white hover:bg-white/30 w-12 h-12 flex items-center justify-center"
+                    @click="prev"
+                >
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg> 
+                </button>
+
+                <div class="overflow-hidden">
+                    <div class="flex items-center transition-transform duration-1000"
+                        :style="{transform: `translateX(${featuredMoviesScrollStep * -100}%)`}"
+                    >
+                        <template x-for="movie in featuredMovies">
+                            <div class="w-full flex-shrink-0">
+                                <div class="max-w-5xl mx-auto flex items-center justify-between">
+                                    <div class="flex gap-10 mr-16">
+                                        <img class="rounded-lg w-[300px] aspect-[1/1.35]" :src="movie.image" alt="" />
+                                        <div class="pt-8 pb-10 min-h-full flex flex-col justify-between">
+                                            <div>
+                                                <h3 class="text-4xl font-bold" x-text="movie.title"></h3>
+                                                <p class="mt-5 text-lg font-light leading-relaxed" x-text="movie.synopsis.substring(0, 250)">
+                                                </p>
+                                            </div>
+                
+                                            <div class="flex items-center">
+                                                <svg class="w-5 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11z"/><circle cx="17.5" cy="17.5" r="4.5"/><path d="M3 13.5h8v8H3z"/></svg>
+                
+                                                <p class="font-medium" x-text="movie.genre">
+                                                </p>
+                                            </div>
+                
+                                            <div class="flex items-center gap-2">
+                                                <div class="text-[#ef3f22] flex items-center gap-2">
+                                                    <svg x-show="movie.rating >= 7" id="fullStar" class="w-6" fill="currentColor" viewBox="0 0 24 24"><polygon points="14.43,10 12,2 9.57,10 2,10 8.18,14.41 5.83,22 12,17.31 18.18,22 15.83,14.41 22,10"/></svg>
+            
+                                                    <svg x-show="movie.rating < 4" id="emptyStar" class="w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg>
+            
+                                                    <svg x-show="movie.rating >= 4 && movie.rating < 7" id="halfStar" class="w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22,9.24l-7.19-0.62L12,2L9.19,8.63L2,9.24l5.46,4.73L5.82,21L12,17.27L18.18,21l-1.63-7.03L22,9.24z M12,15.4V6.1 l1.71,4.04l4.38,0.38l-3.32,2.88l1,4.28L12,15.4z"/></svg>
+                                                </div>
+                                                  
+                                                <p class="text-lg tracking-widest leading-none font-bold" x-text="movie.rating.toFixed(1)">5.8</p>
+                                            </div>
+                
+                                            <div class="flex items-center gap-3">
+                                                <button class="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200 border border-current focus:outline-none px-4 py-3 uppercase text-sm leading-none tracking-wide font-semibold rounded">
+                                                    <svg class="w-4 h-4 -ml-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                    </svg>
+                                                      
+                                                    DOWNLOAD 720P
+                                                </button>
+                                                <button class="flex items-center gap-2 bg-white text-black hover:opacity-80 transition-opacity duration-200 border border-current focus:outline-none px-4 py-3 uppercase text-sm leading-none tracking-wide font-semibold rounded">
+                                                    <svg class="w-4 h-4 -ml-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                    </svg>
+                
+                                                    DOWNLOAD 1080P
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                
+                                    <div class="group flex-shrink-0 flex flex-col items-center gap-4"
+                                        @click="playTrailer(movie.trailer)"
+                                    >
+                                        <div class="relative cursor-pointer">
+                                            <span class="scale-50 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500 absolute -inset-2 bg-white/40 borders border-white/10 rounded-full">
+                                            </span>
+                                            <span class="scale-50 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500 absolute -inset-4 bg-white/40 borders border-white/10 rounded-full">
+                                            </span>
+                                            <button class="relative z-10 group-hover:scale-90 transition-transform duration-300 rounded-full w-12 h-12 bg-white flex items-center justify-center">
+                                                <svg fill="currentColor" class="w-7 h-7 text-black transition-colors duration-300 group-hover:text-red-600" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                            </button>
+                                        </div>
+                
+                                        <span class="group-hover:opacity-0s group-hover:text-red-500 group-hover:translate-y-3 transition duration-500 text-xs opacity-75">Watch trailer</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <button class="-mr-1.5 flex-shrink-0 rounded-full text-white/40 hover:text-white hover:bg-white/30 w-12 h-12 flex items-center justify-center"
+                    @click="next"
+                >
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>                      
+                </button>
+            </div>
+        </div>
+    </div>
+
+	<div class="mb-8">
+        <div
+            class="mx-auto max-w-7xl"
+		>
+            <h3 class="text-2xl font-bold mb-6">Latest movies</h3>
+			<div class="grid grid-cols-5 gap-5">
+				<template x-for="(movie, index) in movies">
+					<a href="#" x-show="index <= limit" class="bg-neutral-800 shadow border-2 border-transparent hover:border-neutral-700 transition rounded-lg overflow-hidden">
+						<div
+							class="p-2 bg-gray-200 relative aspect-[1/1.3]"
+						>
+							<img
+								class="absolute inset-0 w-full h-full object-cover object-top"
+								:src="movie.image"
+								alt=""
+							/>
+						</div>
+
+						<div class="py-2 px-2.5">
+							<h5 x-text="movie.title" class="text-sm mt-0.5 mb-1 truncate"></h5>
+							<div class="min-w-0 flex items-center justify-between gap-3 text-neutral-400/80">
+                                <p class="text-sm truncate">
+                                    <span x-text="movie.year"></span>,
+                                    <span x-text="movie.genre.split('/').slice(0,2).join('/')"></span>
+                                </p>
+
+                                <div class="flex items-center gap-0.5">
+                                    <svg x-show="movie.rating >= 7" id="fullStar" class="w-4 h-4 text-[#ef3f22]" fill="currentColor" viewBox="0 0 24 24"><polygon points="14.43,10 12,2 9.57,10 2,10 8.18,14.41 5.83,22 12,17.31 18.18,22 15.83,14.41 22,10"/></svg>
+
+                                    <svg x-show="movie.rating < 4" id="emptyStar" class="w-4 h-4 text-[#ef3f22]" fill="currentColor" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg>
+
+                                    <svg x-show="movie.rating >= 4 && movie.rating < 7" id="halfStar" class="w-4 h-4 text-[#ef3f22]" fill="currentColor" viewBox="0 0 24 24"><path d="M22,9.24l-7.19-0.62L12,2L9.19,8.63L2,9.24l5.46,4.73L5.82,21L12,17.27L18.18,21l-1.63-7.03L22,9.24z M12,15.4V6.1 l1.71,4.04l4.38,0.38l-3.32,2.88l1,4.28L12,15.4z"/></svg>
+                                      
+                                    <p x-text="movie.rating.toFixed(1)" class="text-sm"></p>
+                                </div>
+                            </div>
+						</div>
+					</a>
+				</template>
+			</div>
+		</div>
+	</div>
+
+    <!-- Styleable Youtube Player -->
+    <style>.pointer-events-none{pointer-events: none;}.fixed{position: fixed;}.inset-0{top: 0px;right: 0px;bottom: 0px;left: 0px;}.top-6{top: 1.5rem;}.right-8{right: 2rem;}.z-1000{z-index: 1000;}.z-10{z-index: 10;}.mx-auto{margin-left: auto;margin-right: auto;}.grid{display: grid;}.h-full{height: 100%;}.h-9{height: 2.25rem;}.h-6{height: 1.5rem;}.w-full{width: 100%;}.w-9{width: 2.25rem;}.w-6{width: 1.5rem;}.place-items-center{place-items: center;}.rounded-full{border-radius: 9999px;}.bg-black\/90{background-color: rgb(0 0 0 / 0.9);}.bg-white{--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity));}.text-indigo-900{--tw-text-opacity: 1;color: rgb(49 46 129 / var(--tw-text-opacity));}.opacity-0{opacity: 0;}.open\:pointer-events-auto[open]{pointer-events: auto;}.open\:opacity-100[open]{opacity: 1;}</style><dialog id="globalYoutubePlayer"class="pointer-events-none opacity-0 open:pointer-events-auto open:opacity-100 fixed inset-0 w-full h-full z-1000 bg-black/90 grid place-items-center"><div id="player"class="bg-white mx-auto"style="width: 800px; height: 450px"></div><button class="bg-white text-indigo-900 grid place-items-center w-9 h-9 rounded-full z-10 fixed top-6 right-8"onclick="closeGlobalYoutubePlayer()"><svg xmlns="http://www.w3.org/2000/svg"fill="none"viewBox="0 0 24 24"stroke-width="1.5"stroke="currentColor"class="w-6 h-6"><path strokeLinecap="round"strokeLinejoin="round"d="M6 18L18 6M6 6l12 12"/></svg></button></dialog><script>function loadIframeAPI(){return new Promise((resolve)=>{var tag=document.createElement("script");tag.src="https://www.youtube.com/iframe_api";var firstScriptTag=document.getElementsByTagName("script")[0];firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);window.onYouTubeIframeAPIReady=()=>{resolve();};});}loadIframeAPI().then(async (res)=>{window.globalPlayer=await createPlayer();processInlineVideos();});function getVideoId(videUrl){var regExp=/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;var match=videUrl.match(regExp);return match && match[7].length==11 ? match[7] : false;}function processInlineVideos(){document.querySelectorAll(".w-embed-youtubevideo").forEach((videoWrapper)=>{const videoUrl=videoWrapper.querySelector("iframe").src;const parent=videoWrapper.parentElement;parent.addEventListener("click", ()=>{openGlobalYoutubePlayer(getVideoId(videoUrl));});});}async function createPlayer({playerId="player",placement="full",videoId="",onStateChange=()=>{},}={}){return new Promise((resolve)=>{const{width, height}={inline: ["100%", "100%"],full: [640, 390],}[placement];const player=new YT.Player(playerId,{height: "390",width: "640",videoId,playerVars:{playsinline: 1,},events:{onReady(e){resolve(e.target);},onStateChange,},});});}function togglePlay(){const currentState=globalPlayer.getPlayerState();if ([YT.PlayerState.PLAYING, YT.PlayerState.BUFFERING].includes(currentState)){globalPlayer.stopVideo();}else{globalPlayer.playVideo();}}function openGlobalYoutubePlayer(videoId){window.ogBodyOverflow=document.body.style.overflow;document.body.style.overflow="hidden";window.ogHtmlOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow="hidden";document.getElementById("globalYoutubePlayer").open=true;globalPlayer.loadVideoById(videoId);}function closeGlobalYoutubePlayer(){document.body.style.overflow=window.ogBodyOverflow;document.documentElement.style.overflow=window.ogHtmlOverflow;document.getElementById("globalYoutubePlayer").open=false;globalPlayer.stopVideo();}document.addEventListener("keyup", (e)=>{if (e.key=="Escape") closeGlobalYoutubePlayer();});</script>
+</html>
+
+
+<script src="https://unpkg.com/alpinejs@3.11.1/dist/cdn.min.js" defer></script>
+
+<script>
+    // Crawler
+    // .movie-card => image::img::src|title::.movie-title > div|year::.movie-title .year|genre::.floater > div > div|rating::.floater > div > div + div
+    
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('peruzi', () => ({
+            scrolled: false,
+			limit: 50,
+            movies: [{"image":"https://yts.mx/assets/images/movies/dog_gone_2023/medium-cover.jpg","title":"Dog Gone","year":"2023","genre":"Action / Biography / Drama / Family","rating":"6"},{"image":"https://yts.mx/assets/images/movies/love_evolving_2023/medium-cover.jpg","title":"Love Evolving","year":"2023","genre":"Drama / Romance","rating":"0"},{"image":"https://yts.mx/assets/images/movies/squared_love_all_over_again_2023/medium-cover.jpg","title":"Squared Love All Over Again","year":"2023","genre":"Comedy / Romance","rating":"5.3"},{"image":"https://yts.mx/assets/images/movies/puppy_bowl_xix_2023/medium-cover.jpg","title":"Puppy Bowl XIX","year":"2023","genre":"Reality-TV","rating":"6.5"},{"image":"https://yts.mx/assets/images/movies/marc_maron_from_bleak_to_dark_2023/medium-cover.jpg","title":"Marc Maron: From Bleak to Dark","year":"2023","genre":"Comedy / Documentary","rating":"7.6"},{"image":"https://yts.mx/assets/images/movies/i_got_problemz_2023/medium-cover.jpg","title":"I Got Problemz","year":"2023","genre":"Comedy","rating":"0"},{"image":"https://yts.mx/assets/images/movies/meet_me_in_paris_2023/medium-cover.jpg","title":"Meet Me in Paris","year":"2023","genre":"Romance","rating":"0"},{"image":"https://yts.mx/assets/images/movies/the_reading_2023/medium-cover.jpg","title":"The Reading","year":"2023","genre":"Thriller","rating":"7.5"},{"image":"https://yts.mx/assets/images/movies/my_valentine_crush_2023/medium-cover.jpg","title":"My Valentine Crush","year":"2023","genre":"Romance","rating":"0"},{"image":"https://yts.mx/assets/images/movies/mind_games_the_experiment_2023/medium-cover.jpg","title":"Mind Games - The Experiment","year":"2023","genre":"Documentary","rating":"6"},{"image":"https://yts.mx/assets/images/movies/ruyanda_gorursun_2023/medium-cover.jpg","title":"In Your Dreams","year":"2023","genre":"Romance","rating":"5.5"},{"image":"https://yts.mx/assets/images/movies/re_resonator_looking_back_at_from_beyond_2023/medium-cover.jpg","title":"Re-Resonator: Looking Back at from Beyond","year":"2023","genre":"Documentary","rating":"0"},{"image":"https://yts.mx/assets/images/movies/your_place_or_mine_2023/medium-cover.jpg","title":"Your Place or Mine","year":"2023","genre":"Action / Comedy / Romance","rating":"5.6"},{"image":"https://yts.mx/assets/images/movies/at_midnight_2023/medium-cover.jpg","title":"At Midnight","year":"2023","genre":"Comedy / Romance","rating":"6"},{"image":"https://yts.mx/assets/images/movies/somebody_i_used_to_know_2023/medium-cover.jpg","title":"Somebody I Used to Know","year":"2023","genre":"Comedy / Romance","rating":"5.7"},{"image":"https://yts.mx/assets/images/movies/dear_david_2023/medium-cover.jpg","title":"Dear David","year":"2023","genre":"Comedy / Drama / Romance","rating":"6"},{"image":"https://yts.mx/assets/images/movies/consent_2023/medium-cover.jpg","title":"Consent","year":"2023","genre":"Drama","rating":"7"},{"image":"https://yts.mx/assets/images/movies/dr_jason_leong_ride_with_caution_2023/medium-cover.jpg","title":"Dr Jason Leong: Ride with Caution","year":"2023","genre":"Comedy","rating":"6.5"},{"image":"https://yts.mx/assets/images/movies/running_with_speed_2023/medium-cover.jpg","title":"Running with Speed","year":"2023","genre":"Action / Documentary","rating":"6.6"},{"image":"https://yts.mx/assets/images/movies/mumbai_mafia_police_vs_the_underworld_2023/medium-cover.jpg","title":"Mumbai Mafia: Police vs the Underworld","year":"2023","genre":"Action / Crime / Documentary","rating":"6.4"},{"image":"https://yts.mx/assets/images/movies/the_wedding_veil_expectations_2023/medium-cover.jpg","title":"The Wedding Veil Expectations","year":"2023","genre":"Action / Comedy / Romance","rating":"6.7"},{"image":"https://yts.mx/assets/images/movies/the_old_way_2023/medium-cover.jpg","title":"The Old Way","year":"2023","genre":"Action / Western","rating":"5.3"},{"image":"https://yts.mx/assets/images/movies/williams_sisters_2023/medium-cover.jpg","title":"Williams Sisters","year":"2023","genre":"Action / Sport","rating":"6.1"},{"image":"https://yts.mx/assets/images/movies/andrew_santino_cheeseburger_2023/medium-cover.jpg","title":"Andrew Santino: Cheeseburger","year":"2023","genre":"Action / Comedy / Documentary","rating":"6.5"},{"image":"https://yts.mx/assets/images/movies/the_hatchet_wielding_hitchhiker_2023/medium-cover.jpg","title":"The Hatchet Wielding Hitchhiker","year":"2023","genre":"Action / Crime / Documentary","rating":"6.2"},{"image":"https://yts.mx/assets/images/movies/house_of_grucci_2023/medium-cover.jpg","title":"House of Grucci","year":"2023","genre":"Action / Documentary","rating":"7.3"},{"image":"https://yts.mx/assets/images/movies/the_dog_lovers_guide_to_dating_2023/medium-cover.jpg","title":"The Dog Lover's Guide to Dating","year":"2023","genre":"Action / Comedy / Romance","rating":"6.2"},{"image":"https://yts.mx/assets/images/movies/the_love_club_nicole_2023/medium-cover.jpg","title":"The Love Club: Nicole","year":"2023","genre":"Comedy / Romance","rating":"0"},{"image":"https://yts.mx/assets/images/movies/thunivu_2023/medium-cover.jpg","title":"Thunivu","year":"2023","genre":"Action / Adventure / Thriller","rating":"6.7"},{"image":"https://yts.mx/assets/images/movies/the_65th_annual_grammy_awards_2023/medium-cover.jpg","title":"The 65th Annual Grammy Awards","year":"2023","genre":"Music / Reality-TV","rating":"4.2"},{"image":"https://yts.mx/assets/images/movies/those_who_call_2023/medium-cover.jpg","title":"Those Who Call","year":"2023","genre":"Horror","rating":"3.3"},{"image":"https://yts.mx/assets/images/movies/trolled_2023/medium-cover.jpg","title":"Trolled","year":"2023","genre":"Action / Horror / Thriller","rating":"0"},{"image":"https://yts.mx/assets/images/movies/the_nomad_2023/medium-cover.jpg","title":"The Nomad","year":"2023","genre":"Action / Sci-Fi / Thriller","rating":"0"},{"image":"https://yts.mx/assets/images/movies/tomorrows_game_2023/medium-cover.jpg","title":"Tomorrow's Game","year":"2023","genre":"Family / Sci-Fi / Sport","rating":"0"},{"image":"https://yts.mx/assets/images/movies/cabin_tales_2023/medium-cover.jpg","title":"Cabin Tales","year":"2023","genre":"Horror","rating":"0"},{"image":"https://yts.mx/assets/images/movies/you_people_2023/medium-cover.jpg","title":"You People","year":"2023","genre":"Comedy / Romance","rating":"5.5"},{"image":"https://yts.mx/assets/images/movies/5g_the_reckoning_2023/medium-cover.jpg","title":"5G: The Reckoning","year":"2023","genre":"Action / Horror","rating":"2.9"},{"image":"https://yts.mx/assets/images/movies/devil_beneath_2023/medium-cover.jpg","title":"Devil Beneath","year":"2023","genre":"Thriller","rating":"4.1"},{"image":"https://yts.mx/assets/images/movies/the_raker_house_2023/medium-cover.jpg","title":"The Raker House","year":"2023","genre":"Thriller","rating":"4.6"},{"image":"https://yts.mx/assets/images/movies/waking_karma_2023/medium-cover.jpg","title":"Waking Karma","year":"2023","genre":"Horror / Thriller","rating":"3.4"},{"image":"https://yts.mx/assets/images/movies/the_3rd_guest_2023/medium-cover.jpg","title":"The 3rd Guest","year":"2023","genre":"Thriller","rating":"2.4"},{"image":"https://yts.mx/assets/images/movies/teen_wolf_the_movie_2023/medium-cover.jpg","title":"Teen Wolf: The Movie","year":"2023","genre":"Action / Drama / Fantasy / Romance / Thriller","rating":"5.7"},{"image":"https://yts.mx/assets/images/movies/ksi_in_real_life_2023/medium-cover.jpg","title":"KSI: In Real Life","year":"2023","genre":"Documentary","rating":"7.5"},{"image":"https://yts.mx/assets/images/movies/night_train_2023/medium-cover.jpg","title":"Night Train","year":"2023","genre":"Action / Thriller","rating":"3.4"},{"image":"https://yts.mx/assets/images/movies/squeal_2023/medium-cover.jpg","title":"Squeal","year":"2023","genre":"Comedy / Horror","rating":"0"},{"image":"https://yts.mx/assets/images/movies/imani_2023/medium-cover.jpg","title":"Imani","year":"2023","genre":"Action / Thriller","rating":"3"},{"image":"https://yts.mx/assets/images/movies/sweetie_2023/medium-cover.jpg","title":"Sweetie","year":"2023","genre":"Action / Biography / Documentary","rating":"8"},{"image":"https://yts.mx/assets/images/movies/chhatriwali_2023/medium-cover.jpg","title":"Chhatriwali","year":"2023","genre":"Comedy / Drama","rating":"7.8"},{"image":"https://yts.mx/assets/images/movies/pamela_a_love_story_2023/medium-cover.jpg","title":"Pamela: A Love Story","year":"2023","genre":"Biography / Documentary","rating":"7.3"}].map((m) => ({...m, rating: Number(m.rating)})),
+            featuredMoviesScrollStep: 0,
+            featuredMovies: [
+                {
+                    "cover": "https://img.yts.mx/assets/images/movies/your_place_or_mine_2023/background.jpg",
+                    "image": "https://yts.mx/assets/images/movies/your_place_or_mine_2023/large-cover.jpg",
+                    "trailer": "https://youtu.be/5JyfgkPMXk0",
+                    "title": "Your Place or Mine",
+                    "year": "2023",
+                    "genre": "Action / Comedy / Romance",
+                    "rating": 7.2,
+                    "synopsis": "When best friends and total opposites Debbie and Peter swap homes for a week, they get a peek into each other's lives that could open the door to love."
+                },
+                {
+                    "cover": "https://img.yts.mx/assets/images/movies/somebody_i_used_to_know_2023/background.jpg",
+                    "image": "https://yts.mx/assets/images/movies/somebody_i_used_to_know_2023/large-cover.jpg",
+                    "trailer": "https://youtu.be/f497dkv3vfU",
+                    "title": "Somebody I Used to Know",
+                    "year": "2023",
+                    "genre": "Comedy / Romance",
+                    "rating": 3.8,
+                    "synopsis": "On a trip to her hometown, workaholic Ally reminisces with her ex Sean and starts to question everything about the person she's become. Things only get more confusing when she meets Cassidy, who reminds her of the person she used to be."
+                },
+                {
+                    "cover": "https://yts.mx/assets/images/movies/you_people_2023/background.jpg",
+                    "image": "https://yts.mx/assets/images/movies/you_people_2023/large-cover.jpg",
+                    "trailer": "https://youtu.be/JbzBelznMoM",
+                    "title": "You People",
+                    "year": "2023",
+                    "genre": "Comedy / Romance",
+                    "rating": 5.5,
+                    "synopsis": "Follows a new couple and their families, who find themselves examining modern love and family dynamics amidst clashing cultures, societal expectations and generational differences."
+                },
+                {
+                    "cover": "https://yts.mx/assets/images/movies/chhatriwali_2023/background.jpg",
+                    "image": "https://yts.mx/assets/images/movies/chhatriwali_2023/large-cover.jpg",
+                    "trailer": "https://youtu.be/T71-r8GFrbI",
+                    "title": "Chhatriwali",
+                    "year": "2023",
+                    "genre": "Comedy / Drama",
+                    "rating": 6.4,
+                    "synopsis": "Sania Dhingra a Chemistry graduate unable to find a job gives Tutions to kids inspired by her skills and taught Ratan Lamba decides offer her a job in his company.Ratan Lamba runs a company which manufactures condoms and currently is facing an issue in manufacturing as his products are getting default.Sania gets an offer of a quality check manager from Ratan Lamba which she rejects taming it to be a shameless job but later accepts it at her higher salary.Sania meets Rishi who runs a religious store and his family is very religious but like her mother Sania does not disclose to Rishi and his family about her job and pretends to be working in a MNC.After getting married an interacting with her sister in law Nisha,Sania gets to know that how young women risk their life's after unsafe sex and that use of of condoms is necessary to avoid unwanted pregnancy.—alex.mjacko@gmail.com"
+                },
+            ],
+            init(){
+                const mainNav = document.querySelector("nav");
+                const mainNavObserver = new IntersectionObserver(
+                    ([e]) => {
+                        this.scrolled = e.intersectionRatio < 1;
+                        console.log("Scrolled: ", e.intersectionRatio < 1)
+                    },
+                    {threshold: [1]}
+                );
+
+                mainNavObserver.observe(mainNav);
+            },
+            playTrailer(videoUrl) {
+                openGlobalYoutubePlayer(getVideoId(videoUrl));
+            },
+            prev() {
+                if(this.featuredMoviesScrollStep > 0)
+                    this.featuredMoviesScrollStep -= 1;
+            },
+            next() {
+                if(this.featuredMoviesScrollStep < this.featuredMovies.length - 1)
+                    this.featuredMoviesScrollStep += 1;
+            }
+        }))
+    })
+</script>
+
